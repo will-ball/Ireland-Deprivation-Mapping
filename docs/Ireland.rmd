@@ -1,0 +1,126 @@
+---
+title: "Mapping Deprivation in Ireland"
+author: "Will Ball"
+date: "09/07/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+![](https://github.com/will-ball/Ireland-Deprivation-Mapping/blob/master/Plots/Irelandsmall.jpg?raw=true)
+
+This tutorial explains a method of mapping small-area deprivation for the Republic of Ireland.
+
+We'll be using the [National Deprivation Index for Ireland](https://www.tcd.ie/medicine/public_health_primary_care/research/deprivation/) developed by a team at Trinity College Dublin, which is based on aggregate data from the 2016 Census.
+
+That will be linked to ['small area' boundary data](https://www.cso.ie/en/census/census2016reports/census2016smallareapopulationstatistics/) which will allow us to make plots showing deprivation across Ireland.
+
+
+
+## Load in the necessary packages
+
+We're making use of a few mapping packages, some general tidyverse code and a colour palette from the viridis package.
+
+```{r packages, <code>, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(readr)
+library(curl)
+library(sf)
+library(rmapshaper)
+library(viridis)
+```
+
+
+
+## National Deprivation Index
+
+Separate to this tutorial I've downloaded the [National Deprivation Index](https://www.tcd.ie/medicine/public_health_primary_care/assets/excel/Trinity-Deprivation-Index.xlsx) which comes in an excel file with multiple sheets. That doesn't play well with R so I've extracted just the sheet we need and converted it to a .csv file which is hosted on [my GitHub](https://raw.githubusercontent.com/will-ball/Ireland-Deprivation-Mapping/master/Data/2016dep.csv).
+
+This file also includes some variables relating to 2011, which we're going to drop. Due to some small area boundary changes between 2011 and 2016 (some combined, some split), there are some rows which have no 2016 score/ranking, so we'll also drop those. I'm also going to rename the 'ID_LABEL' variable to make things more straight-forward later. 
+
+```{r NDI, message=FALSE, warning=FALSE}
+ndi <- read_csv("https://raw.githubusercontent.com/will-ball/Ireland-Deprivation-Mapping/master/Data/2016dep.csv") %>%
+  select(-Population_2011, -Score_2011, -Decile_2011) %>%
+  filter(!is.na(Decile_2016)) %>%
+  rename(sa_code = ID_LABEL)
+head(ndi)
+```
+
+And we're left with the 18,641 SAs, and the larger geographies of Electoral Division (ED_ID) and County. We also have the population for SAs, their scores and the ranking as a decile (10 groups). 
+
+
+
+## Small-area geography shapefile
+
+I've downloaded the .shp file from [here](https://data.gov.ie/dataset/small-areas-generalised-20m-osi-national-statistical-boundaries-2015). I've dropped some unnecessary variables and also renamed some so that joining with the ndi works.
+
+This file helpfully also includes the names for County and Electoral District geographies which is great for creating maps of just those areas. If this wasn't present it would be necessary to find a lookup table between geographies and join that to our file.
+
+```{r shapefile, message=FALSE, warning=FALSE}
+temp_1 <- tempfile()
+temp_2 <- tempfile()
+source <- "http://data-osi.opendata.arcgis.com/datasets/68b14cef8cf247b191ee2737e7e6993d_1.zip"
+temp_1 <- curl_download(url = source, destfile = temp_1, quiet = FALSE)
+unzip(temp_1, exdir = temp_2)
+sf_Ireland <- read_sf(file.path(temp_2,"0d80d6a5-6314-4a4b-ac2f-09f3767f054b2020329-1-1rx3r8i.iy91.shp"))
+sf_Ireland <- sf_Ireland %>% # ms_simplify(sf_Ireland)  %>% 
+  select(-NUTS1, -NUTS1NAME, -NUTS2, -NUTS2NAME, -NUTS3, -NUTS3NAME,
+         -SMALL_AREA, -CSOED, -OSIED, - COUNTY) %>% 
+  rename(sa_code = GEOGID, county = COUNTYNAME, ed_name = EDNAME)
+sf_Ireland
+```
+
+
+
+## Join
+
+We're going to combine the NDI dataset with the shapefile for small areas. Then we coerce it into a 'sf' format. At the same time we'll make sure Decile_2016 is seen as an ordianl variable (an ordered factor in R) 
+
+```{r join, message=FALSE, warning=FALSE}
+join <- left_join(sf_Ireland, ndi, by = "sa_code") %>%
+  st_as_sf(.)
+
+join$Decile_2016 <- as.factor(join$Decile_2016)
+
+head(join)
+```
+
+
+
+## Plot
+
+Now that we have the NDI deciles and the small area shapefiles together in one object, we can make a plot.
+
+To make a plot for a specific area you should alter the 'filter' line which has been commented out here. You can plot by the county or ed_name variables. Don't forget to change the titles accordingly
+
+```{r Plot, warning=FALSE, message=FALSE, echo= TRUE}
+
+theme_set(theme_minimal())
+plot <- join %>% 
+ # filter(county == "Limerick City and County") %>% 
+  ggplot() +                                      
+  geom_sf(aes(fill = Decile_2016),
+          color = NA) +
+  scale_fill_viridis(option = "plasma",
+                     discrete = T,
+                     breaks = levels(join$Decile_2016),
+                     name = "Deprivation Decile",
+                     labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
+                                  "10 - Most Deprived")) +
+  scale_color_viridis() +
+  labs(x = NULL, y = NULL,                                                          
+       title = "Deprivation Deciles by Small Area (2016) for Ireland",
+       subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
+       caption = "Plot by @WillBall12") +  
+  theme(axis.line=element_blank(), 
+        axis.ticks=element_blank(), 
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        panel.grid = element_blank(),
+        plot.caption.position = 'plot',
+        plot.title.position = 'plot')
+
+plot
+```
