@@ -1,5 +1,5 @@
 ---
-title: "Mapping Deprivation in Ireland"
+title: "Mapping Deprivation in Ireland using R"
 author: "Will Ball"
 date: "09/07/2020"
 output: html_document
@@ -11,9 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ![](https://github.com/will-ball/Ireland-Deprivation-Mapping/blob/master/Plots/Irelandsmall.jpg?raw=true)
 
-This tutorial explains a method of mapping small-area deprivation for the Republic of Ireland.
+This tutorial explains a method of mapping small-area deprivation for the Republic of Ireland using R.
 
-We'll be using the [National Deprivation Index for Ireland](https://www.tcd.ie/medicine/public_health_primary_care/research/deprivation/) developed by a team at Trinity College Dublin, which is based on aggregate data from the 2016 Census.
+We'll be using two open source datasets, the first of which is the [National Deprivation Index for Ireland](https://www.tcd.ie/medicine/public_health_primary_care/research/deprivation/) developed by a team at Trinity College Dublin, which is based on aggregate data from the 2016 Census.
 
 That will be linked to ['small area' boundary data](https://www.cso.ie/en/census/census2016reports/census2016smallareapopulationstatistics/) which will allow us to make plots showing deprivation across Ireland.
 
@@ -107,6 +107,7 @@ plot <- join %>%
   scale_fill_viridis(option = "plasma",
                      discrete = T,
                      breaks = levels(join$Decile_2016),
+                     drop = FALSE,
                      name = "Deprivation Decile",
                      labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
                                   "10 - Most Deprived")) +
@@ -142,6 +143,7 @@ plot <- join %>%
   scale_fill_viridis(option = "plasma",
                      discrete = T,
                      breaks = levels(join$Decile_2016),
+                     drop = FALSE,
                      name = "Deprivation Decile",
                      labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
                                   "10 - Most Deprived")) +
@@ -174,6 +176,7 @@ plot <- join %>%
   scale_fill_viridis(option = "plasma",
                      discrete = T,
                      breaks = levels(join$Decile_2016),
+                     drop = FALSE,
                      name = "Deprivation Decile",
                      labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
                                   "10 - Most Deprived")) +
@@ -206,6 +209,7 @@ plot <- join %>%
   scale_fill_viridis(option = "plasma",
                      discrete = T,
                      breaks = levels(join$Decile_2016),
+                     drop = FALSE,
                      name = "Deprivation Decile",
                      labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
                                   "10 - Most Deprived")) +
@@ -237,6 +241,7 @@ plot <- join %>%
   scale_fill_viridis(option = "plasma",
                      discrete = T,
                      breaks = levels(join$Decile_2016),
+                     drop = FALSE,
                      name = "Deprivation Decile",
                      labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
                                   "10 - Most Deprived")) +
