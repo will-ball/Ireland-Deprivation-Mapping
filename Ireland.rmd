@@ -114,7 +114,7 @@ plot <- join %>%
   scale_color_viridis() +
   labs(x = NULL, y = NULL,                                                          
        title = "Deprivation Deciles by Small Area (2016) for Ireland",
-       subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
+       subtitle = "Sources: Teljeur et al (2019) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
        caption = "Plot by @WillBall12") +  
   theme(axis.line=element_blank(), 
         axis.ticks=element_blank(), 
@@ -150,7 +150,7 @@ plot <- join %>%
   scale_color_viridis() +
   labs(x = NULL, y = NULL,                                                          
        title = "Deprivation Deciles by Small Area (2016) for Northern and Western Ireland (NUTS2 Region)",
-       subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
+       subtitle = "Sources: Teljeur et al (2019) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
        caption = "Plot by @WillBall12") +  
   theme(axis.line=element_blank(), 
         axis.ticks=element_blank(), 
@@ -183,7 +183,7 @@ plot <- join %>%
   scale_color_viridis() +
   labs(x = NULL, y = NULL,                                                          
        title = "Deprivation Deciles by Small Area (2016) for Border Ireland (NUTS2 Region)",
-       subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
+       subtitle = "Sources: Teljeur et al (2019) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
        caption = "Plot by @WillBall12") +  
   theme(axis.line=element_blank(), 
         axis.ticks=element_blank(), 
@@ -216,7 +216,7 @@ plot <- join %>%
   scale_color_viridis() +
   labs(x = NULL, y = NULL,                                                          
        title = "Deprivation Deciles by Small Area (2016) for Donegal County",
-       subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
+       subtitle = "Sources: Teljeur et al (2019) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
        caption = "Plot by @WillBall12") +  
   theme(axis.line=element_blank(), 
         axis.ticks=element_blank(), 
@@ -248,7 +248,7 @@ plot <- join %>%
   scale_color_viridis() +
   labs(x = NULL, y = NULL,                                                          
        title = "Deprivation Deciles by Small Area (2016) for Donegal Electoral District",
-       subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
+       subtitle = "Sources: Teljeur et al (2019) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
        caption = "Plot by @WillBall12") +  
   theme(axis.line=element_blank(), 
         axis.ticks=element_blank(), 
