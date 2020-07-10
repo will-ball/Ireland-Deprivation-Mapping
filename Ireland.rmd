@@ -56,7 +56,7 @@ And we're left with the 18,641 SAs, and the larger geographies of Electoral Divi
 
 I've downloaded the .shp file from [here](https://data.gov.ie/dataset/small-areas-generalised-20m-osi-national-statistical-boundaries-2015). I've dropped some unnecessary variables and also renamed some so that joining with the ndi works.
 
-This file helpfully also includes the names for County and Electoral District geographies which is great for creating maps of just those areas. If this wasn't present it would be necessary to find a lookup table between geographies and join that to our file.
+This file helpfully also includes the names for NUTS2, NUTS3, County and Electoral District geographies which is great for creating maps of just those areas. If this wasn't present it would be necessary to find a lookup table between geographies and join that to our file.
 
 ```{r shapefile, message=FALSE, warning=FALSE}
 temp_1 <- tempfile()
@@ -66,9 +66,10 @@ temp_1 <- curl_download(url = source, destfile = temp_1, quiet = FALSE)
 unzip(temp_1, exdir = temp_2)
 sf_Ireland <- read_sf(file.path(temp_2,"0d80d6a5-6314-4a4b-ac2f-09f3767f054b2020329-1-1rx3r8i.iy91.shp"))
 sf_Ireland <- sf_Ireland %>% # ms_simplify(sf_Ireland)  %>% 
-  select(-NUTS1, -NUTS1NAME, -NUTS2, -NUTS2NAME, -NUTS3, -NUTS3NAME,
+  select(-NUTS1, -NUTS1NAME, -NUTS2, -NUTS3,
          -SMALL_AREA, -CSOED, -OSIED, - COUNTY) %>% 
-  rename(sa_code = GEOGID, county = COUNTYNAME, ed_name = EDNAME)
+  rename(sa_code = GEOGID, county = COUNTYNAME, ed_name = EDNAME,
+         nuts2name = NUTS2NAME, nuts3name = NUTS3NAME)
 sf_Ireland
 ```
 
@@ -112,6 +113,136 @@ plot <- join %>%
   scale_color_viridis() +
   labs(x = NULL, y = NULL,                                                          
        title = "Deprivation Deciles by Small Area (2016) for Ireland",
+       subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
+       caption = "Plot by @WillBall12") +  
+  theme(axis.line=element_blank(), 
+        axis.ticks=element_blank(), 
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        panel.grid = element_blank(),
+        plot.caption.position = 'plot',
+        plot.title.position = 'plot')
+
+plot
+```
+
+## Examples at other levels
+
+Here's some examples selected from other levels of geography.
+
+### NUTS2
+
+```{r NUTS2, echo = FALSE}
+theme_set(theme_minimal())
+plot <- join %>% 
+  filter(nuts2name == "Northern and Western") %>% 
+  ggplot() +                                      
+  geom_sf(aes(fill = Decile_2016),
+          color = NA) +
+  scale_fill_viridis(option = "plasma",
+                     discrete = T,
+                     breaks = levels(join$Decile_2016),
+                     name = "Deprivation Decile",
+                     labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
+                                  "10 - Most Deprived")) +
+  scale_color_viridis() +
+  labs(x = NULL, y = NULL,                                                          
+       title = "Deprivation Deciles by Small Area (2016) for Northern and Western Ireland (NUTS2 Region)",
+       subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
+       caption = "Plot by @WillBall12") +  
+  theme(axis.line=element_blank(), 
+        axis.ticks=element_blank(), 
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        panel.grid = element_blank(),
+        plot.caption.position = 'plot',
+        plot.title.position = 'plot')
+
+plot
+```
+
+### NUTS3
+
+
+```{r NUTS3, echo = FALSE}
+theme_set(theme_minimal())
+plot <- join %>% 
+  filter(nuts3name == "Border") %>% 
+  ggplot() +                                      
+  geom_sf(aes(fill = Decile_2016),
+          color = NA) +
+  scale_fill_viridis(option = "plasma",
+                     discrete = T,
+                     breaks = levels(join$Decile_2016),
+                     name = "Deprivation Decile",
+                     labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
+                                  "10 - Most Deprived")) +
+  scale_color_viridis() +
+  labs(x = NULL, y = NULL,                                                          
+       title = "Deprivation Deciles by Small Area (2016) for Border Ireland (NUTS2 Region)",
+       subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
+       caption = "Plot by @WillBall12") +  
+  theme(axis.line=element_blank(), 
+        axis.ticks=element_blank(), 
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        panel.grid = element_blank(),
+        plot.caption.position = 'plot',
+        plot.title.position = 'plot')
+
+plot
+```
+
+### County
+
+
+```{r county, echo = FALSE}
+theme_set(theme_minimal())
+plot <- join %>% 
+  filter(county == "Donegal") %>% 
+  ggplot() +                                      
+  geom_sf(aes(fill = Decile_2016),
+          color = NA) +
+  scale_fill_viridis(option = "plasma",
+                     discrete = T,
+                     breaks = levels(join$Decile_2016),
+                     name = "Deprivation Decile",
+                     labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
+                                  "10 - Most Deprived")) +
+  scale_color_viridis() +
+  labs(x = NULL, y = NULL,                                                          
+       title = "Deprivation Deciles by Small Area (2016) for Donegal County",
+       subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
+       caption = "Plot by @WillBall12") +  
+  theme(axis.line=element_blank(), 
+        axis.ticks=element_blank(), 
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        panel.grid = element_blank(),
+        plot.caption.position = 'plot',
+        plot.title.position = 'plot')
+
+plot
+```
+
+### Electoral District
+
+```{r ED, echo = FALSE}
+theme_set(theme_minimal())
+plot <- join %>% 
+  filter(ed_name == "Donegal") %>% 
+  ggplot() +                                      
+  geom_sf(aes(fill = Decile_2016),
+          color = NA) +
+  scale_fill_viridis(option = "plasma",
+                     discrete = T,
+                     breaks = levels(join$Decile_2016),
+                     name = "Deprivation Decile",
+                     labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
+                                  "10 - Most Deprived")) +
+  scale_color_viridis() +
+  labs(x = NULL, y = NULL,                                                          
+       title = "Deprivation Deciles by Small Area (2016) for Donegal Electoral District",
        subtitle = "Sources: Teljeur et al (2016) and \nOrdnance Survey Ireland under Creative Commons Attribution 4.0", 
        caption = "Plot by @WillBall12") +  
   theme(axis.line=element_blank(), 
