@@ -442,7 +442,7 @@ sf_Ireland</code></pre>
 </div>
 <div id="join" class="section level2">
 <h2>Join</h2>
-<p>We’re going to combine the NDI dataset with the shapefile for small areas. Then we coerce it into a ‘sf’ format. At the same time we’ll make sure Decile_2016 is seen as an ordianl variable (an ordered factor in R)</p>
+<p>We’re going to combine the NDI dataset with the shapefile for small areas. Then we coerce it into a ‘sf’ format. At the same time we’ll make sure Decile_2016 is seen as an ordinal variable (an ordered factor in R)</p>
 <pre class="r"><code>join &lt;- left_join(sf_Ireland, ndi, by = &quot;sa_code&quot;) %&gt;%
   st_as_sf(.)
 
