@@ -25,7 +25,8 @@ We're making use of a few mapping packages, some general tidyverse code and a co
 
 ```{r packages, <code>, warning=FALSE, message=FALSE}
 library(tidyverse)
-library(readr)
+library(janitor)
+library(vroom)
 library(curl)
 library(sf)
 library(rmapshaper)
@@ -36,35 +37,39 @@ library(viridis)
 
 ## National Deprivation Index
 
-Separate to this tutorial I've downloaded the [National Deprivation Index](https://www.tcd.ie/medicine/public_health_primary_care/assets/excel/Trinity-Deprivation-Index.xlsx) which comes in an excel file with multiple sheets. That doesn't play well with R so I've extracted just the sheet we need and converted it to a .csv file which is hosted on [my GitHub](https://raw.githubusercontent.com/will-ball/Ireland-Deprivation-Mapping/master/Data/2016dep.csv).
+Separate to this tutorial I've downloaded the [National Deprivation Index](https://www.tcd.ie/medicine/public_health_primary_care/assets/excel/Trinity-Deprivation-Index.xlsx) which comes in an excel file with multiple sheets. To simplify things I've extracted just the sheet we need and converted it to a .csv file which is hosted on [my GitHub](https://raw.githubusercontent.com/will-ball/Ireland-Deprivation-Mapping/master/Data/2016dep.csv).
 
-This file also includes some variables relating to 2011, which we're going to drop. Due to some small area boundary changes between 2011 and 2016 (some combined, some split), there are some rows which have no 2016 score/ranking, so we'll also drop those. I'm also going to rename the 'ID_LABEL' variable to make things more straight-forward later. 
+This file also includes some variables relating to 2011, which we're going to drop. Due to some small area boundary changes between 2011 and 2016 (some combined, some split), there are some rows which have no 2016 score/ranking, so we'll also drop those. I'm also going to rename the 'id_label' variable to make things more straight-forward later. 
 
 ```{r NDI, message=FALSE, warning=FALSE}
 ndi <- read_csv("https://raw.githubusercontent.com/will-ball/Ireland-Deprivation-Mapping/master/Data/2016dep.csv") %>%
-  select(-Population_2011, -Score_2011, -Decile_2011) %>%
-  filter(!is.na(Decile_2016)) %>%
-  rename(sa_code = ID_LABEL)
+  clean_names() %>% 
+  select(-population_2011, -score_2011, -decile_2011) %>%
+  filter(!is.na(decile_2016)) %>%
+  rename(sa_id = id_label)
 head(ndi)
 ```
 
-And we're left with the 18,641 SAs, and the larger geographies of Electoral Division (ED_ID) and County. We also have the population for SAs, their scores and the ranking as a decile (10 groups). 
+And we're left with the 18,641 SAs, and the larger geographies of Electoral Division (ed_id) and County. We also have the population for SAs, their scores and the ranking as a decile (10 groups). 
 
 
 
 ## Small-area geography shapefile
 
-I've downloaded the .shp file from [here](https://data.gov.ie/dataset/small-areas-generalised-20m-osi-national-statistical-boundaries-2015). I've dropped some unnecessary variables and also renamed some so that joining with the ndi works.
+I've downloaded the shapefiles from [here](https://data-osi.opendata.arcgis.com/datasets/osi::small-areas-generalised-20m-national-statistical-boundaries-2015). I've dropped some unnecessary variables and also renamed some so that joining with the ndi works.
 
 This file helpfully also includes the names for NUTS2, NUTS3, County and Electoral District geographies which is great for creating maps of just those areas. If this wasn't present it would be necessary to find a lookup table between geographies and join that to our file.
 
 ```{r shapefile, message=FALSE, warning=FALSE}
-temp_1 <- tempfile()
-temp_2 <- tempfile()
-source <- "http://data-osi.opendata.arcgis.com/datasets/68b14cef8cf247b191ee2737e7e6993d_1.zip"
-temp_1 <- curl_download(url = source, destfile = temp_1, quiet = FALSE)
-unzip(temp_1, exdir = temp_2)
-sf_Ireland <- read_sf(file.path(temp_2,"0d80d6a5-6314-4a4b-ac2f-09f3767f054b2020329-1-1rx3r8i.iy91.shp"))
+#temp_1 <- tempfile()
+#temp_2 <- tempfile()
+#source <- "http://data-osi.opendata.arcgis.com/datasets/68b14cef8cf247b191ee2737e7e6993d_1.zip"
+#temp_1 <- curl_download(url = source, destfile = temp_1, quiet = FALSE)
+#unzip(temp_1, exdir = temp_2)
+sf_Ireland <- st_read() %>% 
+  st_as_sf()
+
+
 sf_Ireland <- sf_Ireland %>% # ms_simplify(sf_Ireland)  %>% 
   select(-NUTS1, -NUTS1NAME, -NUTS2, -NUTS3,
          -SMALL_AREA, -CSOED, -OSIED, - COUNTY) %>% 
