@@ -1,0 +1,29 @@
+---
+title: "Testing ED"
+author: "Will Ball"
+date: "2023-06-02"
+output: html_document
+---
+
+## Packages
+
+```{r}
+library(tidyverse)
+library(tidylog)
+library(vroom)
+library(janitor)
+library(sf)
+library(s2)
+library(viridis)
+```
+
+## Data
+
+```{r}
+# ED NDI
+ed_ndi <- vroom("https://raw.githubusercontent.com/will-ball/Ireland-Deprivation-Mapping/master/Data/ed_ndi_2016.csv", delim = ",") %>% 
+  clean_names()
+
+# ED Shapefiles
+
+```

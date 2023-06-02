@@ -27,7 +27,6 @@ We're making use of a few mapping packages, some general tidyverse code and a co
 library(tidyverse)
 library(janitor)
 library(vroom)
-library(curl)
 library(sf)
 library(s2)
 library(rmapshaper)

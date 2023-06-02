@@ -1,4 +1,4 @@
-﻿ed_id,ed_name,county,population_2006,score_2016,decile_2016,population_2011,score_2011,decile_2011,population_2016,score_2016,decile_2016
+﻿ed_id,ed_name,county,population_2006,score_2006,decile_2006,population_2011,score_2011,decile_2011,population_2016,score_2016,decile_2016
 E01001,Carlow Urban,Carlow,4605,3.426120191,10,4181,3.821932037,10,4560,4.01414014,10
 E01002,Graigue Urban,Carlow,1524,3.182527037,10,1272,2.968886098,10,1405,2.995035408,10
 E01003,Clonmore,Carlow,530,-0.435187469,6,560,-0.48309229,5,526,-0.511785014,5
