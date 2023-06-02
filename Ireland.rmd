@@ -29,6 +29,7 @@ library(janitor)
 library(vroom)
 library(curl)
 library(sf)
+library(s2)
 library(rmapshaper)
 library(viridis)
 ```
@@ -61,20 +62,12 @@ I've downloaded the shapefiles from [here](https://data-osi.opendata.arcgis.com/
 This file helpfully also includes the names for NUTS2, NUTS3, County and Electoral District geographies which is great for creating maps of just those areas. If this wasn't present it would be necessary to find a lookup table between geographies and join that to our file.
 
 ```{r shapefile, message=FALSE, warning=FALSE}
-#temp_1 <- tempfile()
-#temp_2 <- tempfile()
-#source <- "http://data-osi.opendata.arcgis.com/datasets/68b14cef8cf247b191ee2737e7e6993d_1.zip"
-#temp_1 <- curl_download(url = source, destfile = temp_1, quiet = FALSE)
-#unzip(temp_1, exdir = temp_2)
-sf_Ireland <- st_read() %>% 
-  st_as_sf()
+sf_Ireland <- st_read("~/Data/tmp/Ireland Deprivation Mapping/Data/shapefiles/Small_Areas_Gen_20m___2015.shp") %>% 
+  ms_simplify() %>% 
+  select(-NUTS1, -NUTS1NAME, -NUTS2, -NUTS3, -SMALL_AREA, -CSOED, -OSIED, - COUNTY) %>% 
+  rename(sa_id = GEOGID, county = COUNTYNAME, ed_name = EDNAME, nuts2name = NUTS2NAME, nuts3name = NUTS3NAME) %>% 
+  clean_names()
 
-
-sf_Ireland <- sf_Ireland %>% # ms_simplify(sf_Ireland)  %>% 
-  select(-NUTS1, -NUTS1NAME, -NUTS2, -NUTS3,
-         -SMALL_AREA, -CSOED, -OSIED, - COUNTY) %>% 
-  rename(sa_code = GEOGID, county = COUNTYNAME, ed_name = EDNAME,
-         nuts2name = NUTS2NAME, nuts3name = NUTS3NAME)
 sf_Ireland
 ```
 
@@ -85,10 +78,9 @@ sf_Ireland
 We're going to combine the NDI dataset with the shapefile for small areas. Then we coerce it into a 'sf' format. At the same time we'll make sure Decile_2016 is seen as an ordinal variable (an ordered factor in R) 
 
 ```{r join, message=FALSE, warning=FALSE}
-join <- left_join(sf_Ireland, ndi, by = "sa_code") %>%
-  st_as_sf(.)
-
-join$Decile_2016 <- as.factor(join$Decile_2016)
+join <- left_join(sf_Ireland, ndi, by = c("sa_id", "county")) %>%
+  st_as_sf() %>% 
+  mutate(decile_2016 = as.factor(decile_2016))
 
 head(join)
 ```
@@ -107,11 +99,11 @@ theme_set(theme_minimal())
 plot <- join %>% 
  # filter(county == "Limerick City and County") %>% 
   ggplot() +                                      
-  geom_sf(aes(fill = Decile_2016),
+  geom_sf(aes(fill = decile_2016),
           color = NA) +
   scale_fill_viridis(option = "plasma",
                      discrete = T,
-                     breaks = levels(join$Decile_2016),
+                     breaks = levels(join$decile_2016),
                      drop = FALSE,
                      name = "Deprivation Decile",
                      labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
@@ -143,11 +135,11 @@ theme_set(theme_minimal())
 plot <- join %>% 
   filter(nuts2name == "Northern and Western") %>% 
   ggplot() +                                      
-  geom_sf(aes(fill = Decile_2016),
+  geom_sf(aes(fill = decile_2016),
           color = NA) +
   scale_fill_viridis(option = "plasma",
                      discrete = T,
-                     breaks = levels(join$Decile_2016),
+                     breaks = levels(join$decile_2016),
                      drop = FALSE,
                      name = "Deprivation Decile",
                      labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
@@ -176,11 +168,11 @@ theme_set(theme_minimal())
 plot <- join %>% 
   filter(nuts3name == "Border") %>% 
   ggplot() +                                      
-  geom_sf(aes(fill = Decile_2016),
+  geom_sf(aes(fill = decile_2016),
           color = NA) +
   scale_fill_viridis(option = "plasma",
                      discrete = T,
-                     breaks = levels(join$Decile_2016),
+                     breaks = levels(join$decile_2016),
                      drop = FALSE,
                      name = "Deprivation Decile",
                      labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
@@ -209,11 +201,11 @@ theme_set(theme_minimal())
 plot <- join %>% 
   filter(county == "Donegal") %>% 
   ggplot() +                                      
-  geom_sf(aes(fill = Decile_2016),
+  geom_sf(aes(fill = decile_2016),
           color = NA) +
   scale_fill_viridis(option = "plasma",
                      discrete = T,
-                     breaks = levels(join$Decile_2016),
+                     breaks = levels(join$decile_2016),
                      drop = FALSE,
                      name = "Deprivation Decile",
                      labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
@@ -241,11 +233,11 @@ theme_set(theme_minimal())
 plot <- join %>% 
   filter(ed_name == "Donegal") %>% 
   ggplot() +                                      
-  geom_sf(aes(fill = Decile_2016),
+  geom_sf(aes(fill = decile_2016),
           color = NA) +
   scale_fill_viridis(option = "plasma",
                      discrete = T,
-                     breaks = levels(join$Decile_2016),
+                     breaks = levels(join$decile_2016),
                      drop = FALSE,
                      name = "Deprivation Decile",
                      labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
