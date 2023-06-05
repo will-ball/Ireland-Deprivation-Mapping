@@ -10,8 +10,10 @@ output: html_document
 ```{r}
 library(tidyverse)
 library(tidylog)
+library(here)
 library(vroom)
 library(janitor)
+library(stringr)
 library(sf)
 library(s2)
 library(viridis)
@@ -21,9 +23,62 @@ library(viridis)
 
 ```{r}
 # ED NDI
-ed_ndi <- vroom("https://raw.githubusercontent.com/will-ball/Ireland-Deprivation-Mapping/master/Data/ed_ndi_2016.csv", delim = ",") %>% 
-  clean_names()
+ed_ndi <- vroom(here("Data/ed_ndi_2016.csv"), delim = ",") %>% 
+  clean_names() %>% 
+  mutate(ed_id = str_sub(ed_id, 2)) # drop leading E
+  
+# ED Shapefiles from: https://www.cso.ie/en/census/census2011boundaryfiles/
+ed_shp <- st_read(here("Data/shapefiles/Electoral Divisions/Census2011_Electoral_Divisions_generalised20m.shp")) %>% 
+  clean_names() %>% 
+  rename(ed_id = csoed)
 
-# ED Shapefiles
-
+# Catchment
+sjh_catchment <- vroom(here("Data/SJH ED catchment.csv"), delim = ",") %>% 
+  clean_names() %>% 
+  mutate(ed_id = str_sub(ed_id, 2)) # drop leading E
 ```
+
+## Join
+
+```{r}
+ed_joined <- ed_ndi %>% 
+  select(ed_id, ed_name, population_2016, score_2016, decile_2016) %>% 
+  left_join(ed_shp, by = "ed_id") %>% 
+  mutate(decile_2016 = ordered(decile_2016)) %>% 
+  st_as_sf()
+```
+
+## Plot
+
+```{r}
+# Catchment area lookup
+sjh <- sjh_catchment %>% 
+  pull(ed_id)
+
+# Set theme
+theme_set(theme_minimal())
+
+# Plot
+ed_joined %>% 
+  filter(ed_id %in% sjh) %>% # selects on those areas in the catchment 
+  ggplot() +                                      
+  geom_sf(aes(fill = decile_2016)) +
+  scale_fill_viridis(option = "plasma",
+                     discrete = T,
+                     breaks = levels(ed_joined$decile_2016),
+                     drop = FALSE,
+                     name = NULL,
+                     labels = c("1 - Least Deprived", "2", "3", "4", "5", "6", "7", "8", "9",
+                                  "10 - Most Deprived")) +
+  labs(x = NULL, y = NULL,
+       subtitle = "Sources: Teljeur et al (2019) and \nCSO Ireland under Creative Commons Attribution 4.0", 
+       caption = "Plot by @WillBall12") +  
+  theme(axis.line=element_blank(), 
+        axis.ticks=element_blank(), 
+        axis.text=element_blank(),
+        axis.title=element_blank(),
+        panel.grid = element_blank(),
+        plot.caption.position = 'plot',
+        plot.title.position = 'plot')
+```
+
