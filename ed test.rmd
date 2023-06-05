@@ -62,7 +62,7 @@ theme_set(theme_minimal())
 ed_joined %>% 
   filter(ed_id %in% sjh) %>% # selects on those areas in the catchment 
   ggplot() +                                      
-  geom_sf(aes(fill = decile_2016)) +
+  geom_sf(aes(fill = decile_2016)) + # can add ', colour = NA' to remove boundary lines
   scale_fill_viridis(option = "plasma",
                      discrete = T,
                      breaks = levels(ed_joined$decile_2016),
